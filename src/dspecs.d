@@ -14,13 +14,15 @@ auto should(string subject) @property
         {
             currentSubject = subject;
             content();
-            writeln();
+            currentSubject = "";
         }
     }
 
     return Should(subject);
 }
 
+alias ha = should;
+alias は = should;
 
 auto by(string test) @property
 {
@@ -31,7 +33,7 @@ auto by(string test) @property
         void opBinary(string op, string file = __FILE__, int line = __LINE__)(void delegate() content)
         {
             bool error;
-            scope(exit) writeln(file, "(", line.to!string(), "): Test ",  error ? "failure" : "success", ": ", currentSubject, " should ", test);
+            scope(exit) writeln(file, "(", line.to!string(), "): Test ",  error ? "failure" : "success", ": ", currentSubject.length ? currentSubject ~ " should " ~ test : test);
             try
             {
                 content();
@@ -46,6 +48,32 @@ auto by(string test) @property
     return By(test);
 }
 
+auto beki(string test) @property
+{
+    static struct Beki
+    {
+        string test;
+
+        void opBinary(string op, string file = __FILE__, int line = __LINE__)(void delegate() content)
+        {
+            bool error;
+            scope(exit) writeln(file, "(", line.to!string(), "): Test ",  error ? "failure" : "success", ": ", currentSubject.length ? currentSubject ~ "は、" ~ test : test, "べきだ");
+            try
+            {
+                content();
+            }
+            catch(AssertError Unused)
+            {
+                error = true;
+            }
+        }
+    }
+
+    return Beki(test);
+}
+
+alias べき = beki;
+
 version(unittest)
 {
     import std.algorithm: startsWith, endsWith;
@@ -54,6 +82,15 @@ version(unittest)
     {
         bool match = true;
         string str = "abc";
+    }
+
+    struct Piyo
+    {
+        int i;
+        this(int i)
+        {
+            this.i = i * i;
+        }
     }
 }
 
@@ -85,5 +122,10 @@ debug(dspecs) unittest
         {
             assert(hoge.str == "abc");
         };
+    };
+
+    "Piyo(10).iは100である".べき |
+    {
+        assert(Piyo(10).i == 100);
     };
 }
