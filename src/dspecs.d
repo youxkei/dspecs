@@ -1,6 +1,5 @@
 import core.exception: AssertError;
 import std.stdio:      writeln;
-import std.conv:       to;
 
 private string currentSubject;
 
@@ -33,7 +32,6 @@ auto by(string test) @property
         void opBinary(string op, string file = __FILE__, int line = __LINE__)(void delegate() content)
         {
             bool error;
-            scope(exit) writeln(file, "(", line.to!string(), "): Test ",  error ? "failure" : "success", ": ", currentSubject.length ? currentSubject ~ " should " ~ test : test);
             try
             {
                 content();
@@ -41,6 +39,10 @@ auto by(string test) @property
             catch(AssertError Unused)
             {
                 error = true;
+            }
+            finally
+            {
+                writeln(file, "(", line, "): Test ",  error ? "failure" : "success", ": ", currentSubject.length ? currentSubject ~ " should " ~ test : test);
             }
         }
     }
@@ -57,7 +59,6 @@ auto beki(string test) @property
         void opBinary(string op, string file = __FILE__, int line = __LINE__)(void delegate() content)
         {
             bool error;
-            scope(exit) writeln(file, "(", line.to!string(), "): Test ",  error ? "failure" : "success", ": ", currentSubject.length ? currentSubject ~ "は、" ~ test : test, "べきだ");
             try
             {
                 content();
@@ -65,6 +66,10 @@ auto beki(string test) @property
             catch(AssertError Unused)
             {
                 error = true;
+            }
+            finally
+            {
+                writeln(file, "(", line, "): Test ",  error ? "failure" : "success", ": ", currentSubject.length ? currentSubject ~ "は、" ~ test : test, "べきだ");
             }
         }
     }
